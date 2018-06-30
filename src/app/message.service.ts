@@ -9,6 +9,7 @@ export class MessageService {
   }
 
   clear() {
-    this.messages = [];
+    if (confirm('Are you sure?'))
+      this.messages = [];
   }
 }
