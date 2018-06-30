@@ -8,8 +8,16 @@ export class MessageService {
     this.messages.push(message);
   }
 
-  clear() {
-    if (confirm('Are you sure?'))
+  clear(action: string) {
+    if (confirm('Are you sure?')){
+      if ('top5' === action){
+        if (this.messages.length > 5){
+          this.messages.splice(0,5);
+          return;
+        }
+      }
+        
       this.messages = [];
+    }
   }
 }

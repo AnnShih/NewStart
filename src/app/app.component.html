@@ -1,4 +1,8 @@
-<h1>{{title}}</h1>
+<h1>
+  {{title}}
+  <button class="clear"
+  (click)="messageService.clear('top5')">clear top 5 messages</button>
+</h1>
 <nav>
   <a routerLink="/dashboard">Dashboard</a>
   <a routerLink="/heroes">Heroes</a>
