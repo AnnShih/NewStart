@@ -4,18 +4,22 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { Hero } from './hero';
 import { MessageService } from './message.service';
+import { HeroCounterInterface } from './hero-counter.interface';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
 @Injectable()
-export class HeroService {
+export class HeroService implements HeroCounterInterface {
 
   private heroesUrl = 'api/heroes';  // URL to web api
+  private counterStore$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  counter$: Observable<number> = this.counterStore$;
 
   constructor(
     private http: HttpClient,
@@ -25,7 +29,10 @@ export class HeroService {
   getHeroes (): Observable<Hero[]> {
     return this.http.get<Hero[]>(this.heroesUrl)
       .pipe(
-        tap(heroes => this.log(`fetched heroes`)),
+        tap(heroes => {
+          this.log(`fetched heroes`);
+          this.counterStore$.next(heroes.length);
+        }),
         catchError(this.handleError('getHeroes', []))
       );
   }
@@ -70,7 +77,10 @@ export class HeroService {
   /** POST: add a new hero to the server */
   addHero (hero: Hero): Observable<Hero> {
     return this.http.post<Hero>(this.heroesUrl, hero, httpOptions).pipe(
-      tap((hero: Hero) => this.log(`added hero w/ id=${hero.id}`)),
+      tap((hero: Hero) => {
+        this.log(`added hero w/ id=${hero.id}`);
+        this.counterStore$.next(this.counterStore$.getValue() + 1);
+    }),
       catchError(this.handleError<Hero>('addHero'))
     );
   }
@@ -81,7 +91,10 @@ export class HeroService {
     const url = `${this.heroesUrl}/${id}`;
 
     return this.http.delete<Hero>(url, httpOptions).pipe(
-      tap(_ => this.log(`deleted hero id=${id}`)),
+      tap(_ => {
+        this.log(`deleted hero id=${id}`);
+        this.counterStore$.next(this.counterStore$.getValue() - 1);
+      }),
       catchError(this.handleError<Hero>('deleteHero'))
     );
   }
